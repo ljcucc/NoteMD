@@ -148,7 +148,7 @@ class NoteList extends LitElement {
     <div class="note-list" >
       <search-bar @search="${this.onSearch}"></search-bar>
       ${
-        Object.keys(this.list).filter(e=>e.indexOf(this._filteredString)>-1).map((uuid)=>
+        Object.keys(this.list).filter(e=>(this.list[e]?.title || "").indexOf(this._filteredString)>-1 || (this.list[e]?.content || "").indexOf(this._filteredString)>-1).map((uuid)=>
           html`<div class="item" @click="${this.selectBuffer(uuid)}">${this.list[uuid].title || "Untitled"}</div>`
       )}
       <div class="item create" @click="${this.newNote}"> <material-icons style="margin-top: 5px;margin-right: 16px;" name="add_circle_outline"></material-icons> New note</div>
