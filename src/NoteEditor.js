@@ -159,6 +159,10 @@ class NoteEditor extends LitElement {
 
   onChange(){
     const txt = this.renderRoot.querySelector("textarea");
+    if(!this.uuid){
+      txt.value = "";
+      return;
+    }
     let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}" );
     note.content = txt.value
     note.title = this.getTitle(txt.value.split("...")[0] || "Untitled")
