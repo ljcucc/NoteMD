@@ -37,7 +37,7 @@ class ChatBox extends LitElement {
     height: 100%;
     /* max-height: calc( 100vh - 130px); */
     box-sizing: border-box;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
     overflow-x: hidden;
   }
   `;
