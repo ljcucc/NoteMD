@@ -4,14 +4,10 @@
 
 ## Get Started
 
-install packages:
+open index.html in browser.
 
-```bash
-npm i
-```
+> all notes are storage locally at localStorage.
 
-run the app:
+# Todo
 
-```bash
-npm start
-```
+- [x] Delete note

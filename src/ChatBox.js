@@ -66,14 +66,33 @@ class ChatBox extends LitElement {
 
   onMenuChoose(e){
     const id = e.detail?.id || "";
-    if(id == "Settings"){
-      this.dispatchEvent(new Event("settings"));
+    if(id == "Delete"){
+      this.dispatchEvent(new Event("delete"));
+    }
+
+    if(id == "About"){
+      window.open("https://github.com/ljcucc/NoteMD/")
     }
   }
 
   openDropMenu(){
     const dropMenu = this.renderRoot.querySelector("#main-menu")
     dropMenu.toggleMenu();
+  }
+
+  newNote(){
+    function uuidv4() {
+      return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+      );
+    }
+
+    var noteId;
+    while(localStorage.getItem(noteId = uuidv4()));
+  }
+
+  onUpdate(){
+    this.dispatchEvent(new Event("update"));
   }
 
   render(){
@@ -91,12 +110,12 @@ class ChatBox extends LitElement {
           <icon-button name="remove_red_eye" id="more_vert" @click="${this.onToggleNicksList}"></icon-button>
           <icon-button name="more_vert" id="more_vert" @click="${this.openDropMenu}"></icon-button>
           <drop-menu id="main-menu" >
-            <dropmenu-list @item-click="${this.onMenuChoose}" list="Settings,Help"></dropmenu-list>
+            <dropmenu-list @item-click="${this.onMenuChoose}" list="Delete,About"></dropmenu-list>
           </drop-menu>
         </appbar-items>
       </app-topbar>
       <div class="chat-box">
-        <note-editor .uuid=${this.uuid}></note-editor>
+        <note-editor @update="${this.onUpdate}" .uuid=${this.uuid}></note-editor>
         <!-- <chat-sender @send="${this.send}"></chat-sender> -->
       </div>
     </div>

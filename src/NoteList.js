@@ -91,6 +91,10 @@ class NoteList extends LitElement {
     /* border-bottom: 1px solid rgba(0,0,0,0.15); */
   }
 
+  .item.create{
+    background: rgba(0,0,0,0.05);
+  }
+
   .item:hover{
     background: rgba(0,0,0,0.15);
   }
@@ -111,6 +115,19 @@ class NoteList extends LitElement {
         }
       }));
     }.bind(this)
+  }
+
+  newNote(){
+    function uuidv4() {
+      return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+      );
+    }
+    this.dispatchEvent(new CustomEvent("new", {
+      detail: {
+        id: uuidv4()
+      }
+    }));
   }
 
   onSearch(e){
@@ -134,7 +151,7 @@ class NoteList extends LitElement {
         Object.keys(this.list).filter(e=>e.indexOf(this._filteredString)>-1).map((uuid)=>
           html`<div class="item" @click="${this.selectBuffer(uuid)}">${this.list[uuid].title || "(null)"}</div>`
       )}
-      <div class="item"> <material-icons name="add_circle_outline"></material-icons> New note</div>
+      <div class="item create" @click="${this.newNote}"> <material-icons style="margin-top: 5px;margin-right: 16px;" name="add_circle_outline"></material-icons> New note</div>
       <div style="margin-bottom: 100px; width: 300px;"></div>
     </div>
     `;
