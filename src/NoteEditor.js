@@ -128,7 +128,7 @@ class NoteEditor extends LitElement {
 
   updated(){
     const txt = this.renderRoot.querySelector("textarea");
-    const note = localStorage.getItem(`note:${this.uuid}`) || "";
+    const note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
     console.log({
       note,
       uuid: this.uuid
@@ -136,17 +136,43 @@ class NoteEditor extends LitElement {
     txt.value = note.content || "";
   }
 
+  getTitle(txt){
+    let list = txt.split("\n");
+    for(var i in list){
+      var key = list[i].split(":");
+      if(key[0] == "title" && key[1].trim()){
+        return key[1].trim();
+      }
+    }
+  }
+
+  updateTitle(uuid, title){
+    let list = JSON.parse(localStorage.getItem("list") || "[]");
+    for(var i in list){
+      if(uuid == list[i].id){
+        list[i].title = title
+        break;
+      }
+    }
+    localStorage.setItem("list", JSON.stringify(list));
+  }
+
   onChange(){
     const txt = this.renderRoot.querySelector("textarea");
-    let note = localStorage.getItem(`note:${this.uuid}`) || {};
+    let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}" );
     note.content = txt.value
-    localStorage.setItem(this.uuid, note);
+    note.title = this.getTitle(txt.value.split("...")[0] || "Untitled")
+    this.updateTitle(note.id, note.title)
+    console.log(note);
+    localStorage.setItem(`note:${this.uuid}`, JSON.stringify(note))
+
+    this.dispatchEvent(new Event("update"))
   }
 
   render(){
     console.log(this.logs);
     return html`
-    <textarea @change="${this.onChange}" class="chat-box"></textarea>
+    <textarea @keyup="${this.onChange}" @change="${this.onChange}" class="chat-box"></textarea>
     `
   }
 }

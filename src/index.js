@@ -74,7 +74,7 @@ class MainApp extends LitElement {
       background: white;
     }
   
-  @media only screen and (max-width: 750px){
+  @media only screen and (max-width: 900px){
     chat-box{
       min-width: 100vw;
     }
@@ -126,6 +126,8 @@ class MainApp extends LitElement {
 
     _dispNicklist: {type: Array},
     _openSettings: {type: Boolean},
+
+    _previewContent: {type: Object},
   }
 
   constructor(){
@@ -143,57 +145,16 @@ class MainApp extends LitElement {
     this._showNickList = false;
     this._openSettings = true;
 
-    // this.socket = io();
+    this.updateNotesList();
+  }
 
-    // this.socket.on("connect", s=>{
-    //   console.log(`connected ${this.socket.id}, requesting get_line`);
-    //   // this.socket.emit("get_buffers");
-    // });
-
-    // get note
-
-    // this.socket.on("init", e=>{
-    //   console.log(e);
-
-    //   // fetch("/api/get_buffers", {
-    //   //   method: "POST",
-    //   //   headers: {
-    //   //     'Content-Type': 'application/json',
-    //   //   },
-    //   //   body: JSON.stringify({
-    //   //     id: this.socket.id
-    //   //   })
-    //   // }).then(e=>e.json())
-    //   // .then(a=>{
-    //   //   // console.log(e);
-    //   //   let e = a.pointers;
-    //   //   this._bufferPointers = e;
-    //   //   this._noteUuidList = Object.keys(e).reduce((acc,cur)=>{acc[e[cur]]=cur;return acc}, {});
-    //   // });
-
-      
-
-    // })
-
-  //   this.socket.on("new:msg", e=>{
-  //     console.log(e);
-  //     if(e.buffer == this._selectedNoteId){
-  //       this._dispLogs.push(e);
-  //       this._dispLogs = this._dispLogs.map(e=>e);
-  //       // this.requestUpdate();
-  //     }else{
-  //       console.log("not")
-  //     }
-  //   });
-
+  updateNotesList(){
     let { notes, notelist } = this.getNotes();
     this._noteUuidList = notelist;
   }
 
   getNotes(){
-    const notes = localStorage.getItem("list") || [
-      {id: "uuid", title: "Title", preview: "Hello"}
-    ];
+    const notes = JSON.parse(localStorage.getItem("list"), "[]");
     console.log(notes);
 
     let notelist = notes.reduce((acc,cur)=>{
@@ -210,44 +171,27 @@ class MainApp extends LitElement {
   }
 
   onNoteSelected(e) {
-    // console.log(this._noteUuidList);
-    // this._title = this._bufferPointers[e.detail.id];
     this._selectedNoteId = e.detail.id;
-
-    // const noteid = e.detail.id;
-
+    this.updatePreview();
     this.toggleList();
+  }
 
-    // get note content
+  newNote(e){
+    this._selectedNoteId = e.detail.id;
+    let list = JSON.parse(localStorage.getItem("list") || "[]"),
+    note = {
+      id: this._selectedNoteId,
+      title: "Untitled",
+      content: ""
+    };
 
-    // fetch("/api/get_msg", {
-    //   method: "POST",
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     bufferid,
-    //     count: 150,
-    //     id: sid
-    //   })
-    // }).then(e=> e.json())
-    // .then(e=>{
-    //   this._dispLogs = e;
-    // });
+    localStorage.setItem(`note:${note.id}`, JSON.stringify(note))
+    list.push(note)
+    localStorage.setItem("list", JSON.stringify(list) || "[]")
+    this.getNotes()
 
-    // fetch("/api/get_users", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     bufferid,
-    //     id: sid
-    //   })
-    // }).then(e=>e.json())
-    //   .then(e=>{
-    //     this._dispNicklist = e;
-    //   })
+    this.updatePreview();
+    this.toggleList();
   }
 
   connectedCallback(){
@@ -275,27 +219,62 @@ class MainApp extends LitElement {
     this._openSettings = true;
   }
 
+  updatePreview(){
+    this.updateNotesList();
+
+    let note = JSON.parse(localStorage.getItem(`note:${this._selectedNoteId}`) || "{}");
+    let content = note.content || "";
+    let title = note.title || "";
+
+    this._previewContent = {
+      content,
+      title
+    }
+
+    console.log("update")
+  }
+
+  onDelete(){
+    const id = this._selectedNoteId;
+    localStorage.removeItem(`note:${id}`);
+    let list = JSON.parse(localStorage.getItem("list"));
+    function foundWithId(list, id){
+      for(var index in list)
+        if(id == list[index].id) return index
+      return -1
+    }
+    list.splice(foundWithId(id), 1);
+    this._selectedNoteId = "";
+    localStorage.setItem("list", JSON.stringify(list));
+    this._showlist = false;
+    this.updateNotesList();
+    this.requestUpdate();
+
+  }
+
   render() {
     console.log("render");
     console.log(this._noteUuidList);
-    console.log(this._dispLogs);
+    // console.log(this._dispLogs);
 
     return html`
     <div class="app">
       <div class="layout">
-        <note-list .list=${this._noteUuidList} @select="${this.onNoteSelected}" class="${classMap({close:this._showlist })}"></note-list>
+        <note-list .list=${this._noteUuidList} @new="${this.newNote}" @select="${this.onNoteSelected}" class="${classMap({close:this._showlist })}"></note-list>
         <chat-box 
           @show-nickslist="${this.toggleNicksList}" 
-          @send="${this.onMsgSend}" 
+          @update="${this.updatePreview}"
           @showlist="${this.toggleList}" 
-          @settings="${this.settingsOpen}"
+
+          @delete="${this.onDelete}"
           .uuid=${this._selectedNoteId}
-          .title=${this._title}></chat-box>
+          .title=${this._previewContent?.title}></chat-box>
         <nicks-list class="${classMap({
           close:  !this._showNickList
         })}" @close="${this.toggleNicksList}"
-        .nicklist=${this._dispNicklist}
-        .title=${this._title}
+        .uuid=${this._selectedNoteId}
+        .title=${this._previewContent?.title || ""}
+        .content=${this._previewContent?.content || ""}
         ></nicks-list>
       </div>
     </div>
