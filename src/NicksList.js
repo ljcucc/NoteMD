@@ -24,8 +24,14 @@ class NicksList extends LitElement{
       box-sizing: border-box;
       overflow-y: scroll;
       /* width: 30vmax; */
+      width: 100%;
       border-left: 1px solid rgba(0, 0, 0, 0.35);
       font-family: Helvetica,Arial, sans-serif;
+    }
+
+    .nicks-list>div>*{
+      box-sizing: border-box;
+      width: 100%;
     }
 
     .topic{
