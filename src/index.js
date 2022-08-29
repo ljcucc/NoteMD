@@ -243,7 +243,10 @@ class MainApp extends LitElement {
         if(id == list[index].id) return index
       return -1
     }
-    list.splice(foundWithId(id), 1);
+    let foundIndex = foundWithId(list, id);
+    if(foundIndex > -1)
+      list.splice(foundIndex, 1);
+
     this._selectedNoteId = "";
     localStorage.setItem("list", JSON.stringify(list));
     this._showlist = false;
