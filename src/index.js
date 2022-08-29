@@ -157,7 +157,7 @@ class MainApp extends LitElement {
     const notes = JSON.parse(localStorage.getItem("list"), "[]") || [];
     console.log(notes);
 
-    let notelist = notes.reduce((acc,cur)=>{
+    let notelist = (notes || []).reduce((acc,cur)=>{
       const { id } = cur;
       acc[id] = cur;
       return acc;
