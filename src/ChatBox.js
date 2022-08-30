@@ -37,7 +37,7 @@ class ChatBox extends LitElement {
     height: 100%;
     /* max-height: calc( 100vh - 130px); */
     box-sizing: border-box;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
     overflow-x: hidden;
   }
   `;
@@ -68,6 +68,10 @@ class ChatBox extends LitElement {
     const id = e.detail?.id || "";
     if(id == "Delete"){
       this.dispatchEvent(new Event("delete"));
+    }
+
+    if(id == "Settings"){
+      this.dispatchEvent(new Event("settings"))
     }
 
     if(id == "About"){
@@ -110,13 +114,13 @@ class ChatBox extends LitElement {
       <app-topbar>
         <appbar-items slot="left">
           <icon-button style="margin-right:8px;" @click="${this.onToggle}" name="menu" id="more_vert"></icon-button>
-          <appbar-title .title=${this.title}></appbar-title>
+          <appbar-title .title=${this.uuid == ""? "": this.title}></appbar-title>
         </appbar-items>
         <appbar-items slot="right">
           <icon-button name="remove_red_eye" id="more_vert" @click="${this.onToggleNicksList}"></icon-button>
           <icon-button name="more_vert" id="more_vert" @click="${this.openDropMenu}"></icon-button>
           <drop-menu id="main-menu" >
-            <dropmenu-list @item-click="${this.onMenuChoose}" list="Delete,About;split,Reset Storage"></dropmenu-list>
+            <dropmenu-list @item-click="${this.onMenuChoose}" list="About,Settings,Delete;split,Reset Storage"></dropmenu-list>
           </drop-menu>
         </appbar-items>
       </app-topbar>

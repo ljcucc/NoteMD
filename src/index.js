@@ -67,13 +67,13 @@ class MainApp extends LitElement {
     }
 
     settings-page{
-      position: fixed;
+      /* position: fixed;
       top: 0;
       bottom: 0;
       left: 0;
       right: 0;
       z-index: 1000;
-      background: white;
+      background: white; */
     }
   
   @media only screen and (max-width: 900px){
@@ -145,7 +145,7 @@ class MainApp extends LitElement {
 
     this._showlist = true;
     this._showNickList = false;
-    this._openSettings = true;
+    this._openSettings = false;
 
     this.updateNotesList();
   }
@@ -275,7 +275,7 @@ class MainApp extends LitElement {
           @show-nickslist="${this.toggleNicksList}" 
           @update="${this.updatePreview}"
           @showlist="${this.toggleList}" 
-
+          @settings="${this.settingsOpen}"
           @delete="${this.onDelete}"
           .uuid=${this._selectedNoteId}
           .title=${this._previewContent?.title}></chat-box>
@@ -286,6 +286,12 @@ class MainApp extends LitElement {
         .title=${this._previewContent?.title || ""}
         .content=${this._previewContent?.content || ""}
         ></nicks-list>
+        ${
+          (this._openSettings)? 
+            html`
+              <settings-page @close="${this.settingsClose}"></settings-page>
+            `: ""
+        }
       </div>
     </div>
     `;

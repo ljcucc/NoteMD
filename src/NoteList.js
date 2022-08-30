@@ -74,7 +74,7 @@ class NoteList extends LitElement {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 18px;
 
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
   }
   .item{

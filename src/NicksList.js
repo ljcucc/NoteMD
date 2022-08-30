@@ -22,7 +22,7 @@ class NicksList extends LitElement{
     .nicks-list{
       height:100vh;
       box-sizing: border-box;
-      overflow-y: scroll;
+      overflow-y: auto;
       /* width: 30vmax; */
       width: 100%;
       border-left: 1px solid rgba(0, 0, 0, 0.35);
@@ -221,6 +221,16 @@ pre>code::selection, code > *::selection, code>span>*::selection{
   background-color: white !important;
   color: black !important;
 }
+
+td{
+  padding: 16px;
+  height: 30px;
+  font-size: 16px;
+}
+
+th{
+  background: rgba(0,0,0,0.15);
+}
   `;
 
   close(){
@@ -229,7 +239,14 @@ pre>code::selection, code > *::selection, code>span>*::selection{
 
   render(){
     const converter = new showdown.Converter({
-      strikethrough: true
+      strikethrough: true,
+      tables: true,
+      tasklists: true,
+      ghCodeBlocks: true,
+      simplifiedAutoLink: true,
+      openLinksInNewWindow: true,
+      emoji: true,
+      underline: true,
     });
     // let note = JSON.parse(note-editor.getItem(`note:${this.uuid}`) || "{}");
     // let text = note.content || "";

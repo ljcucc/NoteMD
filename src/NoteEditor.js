@@ -19,7 +19,7 @@ class NoteEditor extends LitElement {
     flex-direction: column;
     font-family:Helvetica, Arial, sans-serif;
     font-size: 16px;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     outline: none;
     border: none;
@@ -131,7 +131,10 @@ class NoteEditor extends LitElement {
     const txt = this.renderRoot.querySelector("textarea");
     // const note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
     const note = new Notes().getNote(this.uuid);
-    if(!note) return;
+    if(!note) {
+      txt.value = "";
+      return;
+    }
     console.log({
       note,
       uuid: this.uuid

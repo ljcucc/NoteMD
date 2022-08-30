@@ -23,3 +23,7 @@ open index.html in browser.
 # Todo
 
 - [x] Delete note
+- [ ] Settings page
+- [ ] Markdown snippets
+- [ ] Backend server supported
+- [ ] Adjustable preview & note list
