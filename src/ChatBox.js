@@ -37,7 +37,7 @@ class ChatBox extends LitElement {
     height: 100%;
     /* max-height: calc( 100vh - 130px); */
     box-sizing: border-box;
-    /* overflow-y: scroll; */
+    overflow-y: scroll;
     overflow-x: hidden;
   }
   `;
@@ -73,6 +73,12 @@ class ChatBox extends LitElement {
     if(id == "About"){
       window.open("https://github.com/ljcucc/NoteMD/")
     }
+
+    if(id == "Reset Storage"){
+      if(! confirm("Do you want to do this? All notes will be gone after this action, the action CANNOT undo.")) return;
+      localStorage.clear()
+      location.reload();
+    }
   }
 
   openDropMenu(){
@@ -80,16 +86,16 @@ class ChatBox extends LitElement {
     dropMenu.toggleMenu();
   }
 
-  newNote(){
-    function uuidv4() {
-      return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-      );
-    }
+  // newNote(){
+  //   function uuidv4() {
+  //     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+  //       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  //     );
+  //   }
 
-    var noteId;
-    while(localStorage.getItem(noteId = uuidv4()));
-  }
+  //   var noteId;
+  //   while(localStorage.getItem(noteId = uuidv4()));
+  // }
 
   onUpdate(){
     this.dispatchEvent(new Event("update"));
@@ -110,7 +116,7 @@ class ChatBox extends LitElement {
           <icon-button name="remove_red_eye" id="more_vert" @click="${this.onToggleNicksList}"></icon-button>
           <icon-button name="more_vert" id="more_vert" @click="${this.openDropMenu}"></icon-button>
           <drop-menu id="main-menu" >
-            <dropmenu-list @item-click="${this.onMenuChoose}" list="Delete,About"></dropmenu-list>
+            <dropmenu-list @item-click="${this.onMenuChoose}" list="Delete,About;split,Reset Storage"></dropmenu-list>
           </drop-menu>
         </appbar-items>
       </app-topbar>

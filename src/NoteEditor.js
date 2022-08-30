@@ -1,4 +1,5 @@
 import {LitElement, html, css} from '/lib/lit.min.js';
+import { Notes } from "/src/Notes.js";
 
 class NoteEditor extends LitElement {
   static properties = {
@@ -128,7 +129,9 @@ class NoteEditor extends LitElement {
 
   updated(){
     const txt = this.renderRoot.querySelector("textarea");
-    const note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
+    // const note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
+    const note = new Notes().getNote(this.uuid);
+    if(!note) return;
     console.log({
       note,
       uuid: this.uuid
@@ -146,16 +149,17 @@ class NoteEditor extends LitElement {
     }
   }
 
-  updateTitle(uuid, title){
-    let list = JSON.parse(localStorage.getItem("list") || "[]");
-    for(var i in list){
-      if(uuid == list[i].id){
-        list[i].title = title
-        break;
-      }
-    }
-    localStorage.setItem("list", JSON.stringify(list));
-  }
+  // updateTitle(uuid, title){
+  //   // let list = JSON.parse(localStorage.getItem("list") || "[]");
+  //   let list = new Notes().getNotes();
+  //   for(var i in list){
+  //     if(uuid == list[i].id){
+  //       list[i].title = title
+  //       break;
+  //     }
+  //   }
+  //   // localStorage.setItem("list", JSON.stringify(list));
+  // }
 
   onChange(){
     const txt = this.renderRoot.querySelector("textarea");
@@ -163,12 +167,15 @@ class NoteEditor extends LitElement {
       txt.value = "";
       return;
     }
-    let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}" );
+    // let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}" );
+    let n = new Notes();
+    let note = n.getNote(this.uuid);
     note.content = txt.value
     note.title = this.getTitle(txt.value.split("...")[0] || "Untitled")
-    this.updateTitle(note.id, note.title)
+    // this.updateTitle(note.id, note.title)
     console.log(note);
-    localStorage.setItem(`note:${this.uuid}`, JSON.stringify(note))
+    n.updateNote(this.uuid, note);
+    // localStorage.setItem(`note:${this.uuid}`, JSON.stringify(note))
 
     this.dispatchEvent(new Event("update"))
   }

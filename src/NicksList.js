@@ -231,7 +231,7 @@ pre>code::selection, code > *::selection, code>span>*::selection{
     const converter = new showdown.Converter({
       strikethrough: true
     });
-    // let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
+    // let note = JSON.parse(note-editor.getItem(`note:${this.uuid}`) || "{}");
     // let text = note.content || "";
     // let title = note.title || "";
 

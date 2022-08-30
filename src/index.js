@@ -2,6 +2,8 @@ import {LitElement, html, css, classMap} from '/lib/lit.min.js';
 
 // import { getKeyByValue } from "/lib/utils.js";
 
+import { Notes } from "/src/Notes.js";
+
 import "/src/ChatBox.js";
 import "/src/NoteList.js";
 import "/src/NicksList.js";
@@ -154,8 +156,10 @@ class MainApp extends LitElement {
   }
 
   getNotes(){
-    const notes = JSON.parse(localStorage.getItem("list"), "[]") || [];
-    console.log(notes);
+    // const notes = JSON.parse(localStorage.getItem("list"), "[]") || [];
+    // console.log(notes);
+    let data = new Notes();
+    const notes = data.getNotes();
 
     let notelist = (notes || []).reduce((acc,cur)=>{
       const { id } = cur;
@@ -177,18 +181,21 @@ class MainApp extends LitElement {
   }
 
   newNote(e){
-    this._selectedNoteId = e.detail.id;
-    let list = JSON.parse(localStorage.getItem("list") || "[]"),
-    note = {
-      id: this._selectedNoteId,
+    const id = e.detail.id;
+    this._selectedNoteId = id;
+    console.log("newNote::uuid", this._selectedNoteId);
+    // let list = JSON.parse(localStorage.getItem("list") || "[]"),
+    let note = {
+      id,
       title: "Untitled",
       content: ""
     };
+    new Notes().appendNote(note);
 
-    localStorage.setItem(`note:${note.id}`, JSON.stringify(note))
-    list.push(note)
-    localStorage.setItem("list", JSON.stringify(list) || "[]")
-    this.getNotes()
+    // localStorage.setItem(`note:${note.id}`, JSON.stringify(note))
+    // list.push(note)
+    // localStorage.setItem("list", JSON.stringify(list) || "[]")
+    this.getNotes();
 
     this.updatePreview();
     this.toggleList();
@@ -196,11 +203,6 @@ class MainApp extends LitElement {
 
   connectedCallback(){
     super.connectedCallback();
-  }
-
-  onMsgSend(e){
-    console.log(e)
-    this.socket.emit('message', this._selectedNoteId, e.detail.value);
   }
 
   toggleList(){
@@ -222,7 +224,11 @@ class MainApp extends LitElement {
   updatePreview(){
     this.updateNotesList();
 
-    let note = JSON.parse(localStorage.getItem(`note:${this._selectedNoteId}`) || "{}");
+    console.log("updatePreview", this._selectedNoteId);
+    // let note = JSON.parse(localStorage.getItem(`note:${this._selectedNoteId}`) || "{}");
+    const id = this._selectedNoteId;
+    let note = new Notes().getNote(id);
+    console.log("updatePreview", note);
     let content = note.content || "";
     let title = note.title || "";
 
@@ -236,19 +242,20 @@ class MainApp extends LitElement {
 
   onDelete(){
     const id = this._selectedNoteId;
-    localStorage.removeItem(`note:${id}`);
-    let list = JSON.parse(localStorage.getItem("list"));
-    function foundWithId(list, id){
-      for(var index in list)
-        if(id == list[index].id) return index
-      return -1
-    }
-    let foundIndex = foundWithId(list, id);
-    if(foundIndex > -1)
-      list.splice(foundIndex, 1);
+    // localStorage.removeItem(`note:${id}`);
+    // let list = JSON.parse(localStorage.getItem("list"));
+    // function foundWithId(list, id){
+    //   for(var index in list)
+    //     if(id == list[index].id) return index
+    //   return -1
+    // }
+    // let foundIndex = foundWithId(list, id);
+    // if(foundIndex > -1)
+    //   list.splice(foundIndex, 1);
+    new Notes().deleteNote(id)
 
     this._selectedNoteId = "";
-    localStorage.setItem("list", JSON.stringify(list));
+    // localStorage.setItem("list", JSON.stringify(list));
     this._showlist = false;
     this.updateNotesList();
     this.requestUpdate();
