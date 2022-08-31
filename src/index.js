@@ -2,13 +2,14 @@ import {LitElement, html, css, classMap} from '/lib/lit.min.js';
 
 // import { getKeyByValue } from "/lib/utils.js";
 
-import { Notes } from "/src/Notes.js";
+import { Notes } from "/src/data/Notes.js";
 
-import "/src/ChatBox.js";
+import "/src/AppBox.js";
 import "/src/NoteList.js";
 import "/src/NicksList.js";
 import "/src/components/Appbar.js";
-import "/src/Settings.js";
+import "/src/SettingsDialog.js";
+import { Config } from "/src/data/Config.js";
 
 class MainApp extends LitElement {
   static styles = css`
@@ -28,7 +29,7 @@ class MainApp extends LitElement {
     height: 100%;
   }
 
-  chat-box{
+  .chat-box{
     flex: 1;
     /* height: 100%; */
     height: 100dvh;
@@ -77,7 +78,7 @@ class MainApp extends LitElement {
     }
   
   @media only screen and (max-width: 900px){
-    chat-box{
+    .chat-box{
       min-width: 100vw;
     }
 
@@ -117,17 +118,15 @@ class MainApp extends LitElement {
   `;
 
   static properties = {
+    // Notes opetation
     _noteUuidList: {type: Object},
-    // _bufferPointers: {type: Object},
-    // _dispLogs: {type: Array},
     _title: {type: String},
     _selectedNoteId: {type: String},
 
+    // GUI logci
     _showlist: {type: Boolean},
     _showNickList: {type: Boolean},
-
-    _dispNicklist: {type: Array},
-    _openSettings: {type: Boolean},
+    _openSettings: {type: String},
 
     _previewContent: {type: Object},
   }
@@ -137,15 +136,12 @@ class MainApp extends LitElement {
 
     this._noteUuidList = {};
 
-    // this._dispLogs = [];
-    this._dispNicklist = [];
-
     this._title = "NoteMD";
     this._selectedNoteId = "";
 
     this._showlist = true;
     this._showNickList = false;
-    this._openSettings = false;
+    this._openSettings = "";
 
     this.updateNotesList();
   }
@@ -156,8 +152,6 @@ class MainApp extends LitElement {
   }
 
   getNotes(){
-    // const notes = JSON.parse(localStorage.getItem("list"), "[]") || [];
-    // console.log(notes);
     let data = new Notes();
     const notes = data.getNotes();
 
@@ -166,7 +160,6 @@ class MainApp extends LitElement {
       acc[id] = cur;
       return acc;
     }, {});
-    console.log(notelist);
 
     return {
       notelist,
@@ -181,20 +174,15 @@ class MainApp extends LitElement {
   }
 
   newNote(e){
-    const id = e.detail.id;
-    this._selectedNoteId = id;
-    console.log("newNote::uuid", this._selectedNoteId);
-    // let list = JSON.parse(localStorage.getItem("list") || "[]"),
     let note = {
-      id,
       title: "Untitled",
       content: ""
     };
-    new Notes().appendNote(note);
 
-    // localStorage.setItem(`note:${note.id}`, JSON.stringify(note))
-    // list.push(note)
-    // localStorage.setItem("list", JSON.stringify(list) || "[]")
+    const id = new Notes().appendNote(note);
+    console.log(id)
+    this._selectedNoteId = id;
+
     this.getNotes();
 
     this.updatePreview();
@@ -214,49 +202,35 @@ class MainApp extends LitElement {
   }
 
   settingsClose(){
-    this._openSettings = false;
+    this._openSettings = "false";
   }
 
   settingsOpen(){
-    this._openSettings = true;
+    this._openSettings = "true";
   }
 
+  
   updatePreview(){
     this.updateNotesList();
 
-    console.log("updatePreview", this._selectedNoteId);
-    // let note = JSON.parse(localStorage.getItem(`note:${this._selectedNoteId}`) || "{}");
     const id = this._selectedNoteId;
     let note = new Notes().getNote(id);
-    console.log("updatePreview", note);
     let content = note.content || "";
     let title = note.title || "";
 
     this._previewContent = {
       content,
       title
-    }
-
-    console.log("update")
+    };
   }
 
   onDelete(){
     const id = this._selectedNoteId;
-    // localStorage.removeItem(`note:${id}`);
-    // let list = JSON.parse(localStorage.getItem("list"));
-    // function foundWithId(list, id){
-    //   for(var index in list)
-    //     if(id == list[index].id) return index
-    //   return -1
-    // }
-    // let foundIndex = foundWithId(list, id);
-    // if(foundIndex > -1)
-    //   list.splice(foundIndex, 1);
     new Notes().deleteNote(id)
 
     this._selectedNoteId = "";
-    // localStorage.setItem("list", JSON.stringify(list));
     this._showlist = false;
+
     this.updateNotesList();
     this.requestUpdate();
 
@@ -265,20 +239,23 @@ class MainApp extends LitElement {
   render() {
     console.log("render");
     console.log(this._noteUuidList);
-    // console.log(this._dispLogs);
 
     return html`
     <div class="app">
       <div class="layout">
+
         <note-list .list=${this._noteUuidList} @new="${this.newNote}" @select="${this.onNoteSelected}" class="${classMap({close:this._showlist })}"></note-list>
-        <chat-box 
+
+        <app-box 
+          class="chat-box"
           @show-nickslist="${this.toggleNicksList}" 
           @update="${this.updatePreview}"
           @showlist="${this.toggleList}" 
           @settings="${this.settingsOpen}"
           @delete="${this.onDelete}"
           .uuid=${this._selectedNoteId}
-          .title=${this._previewContent?.title}></chat-box>
+          .title=${this._previewContent?.title}></app-box>
+
         <nicks-list class="${classMap({
           close:  !this._showNickList
         })}" @close="${this.toggleNicksList}"
@@ -286,12 +263,9 @@ class MainApp extends LitElement {
         .title=${this._previewContent?.title || ""}
         .content=${this._previewContent?.content || ""}
         ></nicks-list>
-        ${
-          (this._openSettings)? 
-            html`
-              <settings-page @close="${this.settingsClose}"></settings-page>
-            `: ""
-        }
+
+        <settings-page .open=${this._openSettings} @close="${this.settingsClose}"></settings-page>
+
       </div>
     </div>
     `;

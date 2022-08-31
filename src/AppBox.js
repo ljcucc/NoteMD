@@ -4,12 +4,15 @@ import "/src/components/IconButton.js";
 import "/src/components/DropMenu.js";
 
 import "/src/NoteEditor.js";
+import { Config } from '/src/data/Config.js';
 
 class ChatBox extends LitElement {
   static properties = {
     // logs: {tyep: Array},
     uuid: {type: String},
-    title: {tyep: String}
+    title: {type: String},
+
+    // _fontSize: {type: Number},
   };
 
   static styles = css`
@@ -47,14 +50,11 @@ class ChatBox extends LitElement {
 
     this.uuid = "";
     this.title = "NoteMD";
+    this.config = new Config();
+
+    // this._fontSize = this.config.getConfig("font-size", 16);
   }
-
-  // send(e){
-  //   this.dispatchEvent(new CustomEvent("send", {
-  //     detail:{value: e.detail.value}
-  //   }));
-  // }
-
+  
   onToggle(){
     this.dispatchEvent(new Event("showlist"))
   }
@@ -77,29 +77,12 @@ class ChatBox extends LitElement {
     if(id == "About"){
       window.open("https://github.com/ljcucc/NoteMD/")
     }
-
-    if(id == "Reset Storage"){
-      if(! confirm("Do you want to do this? All notes will be gone after this action, the action CANNOT undo.")) return;
-      localStorage.clear()
-      location.reload();
-    }
   }
 
   openDropMenu(){
     const dropMenu = this.renderRoot.querySelector("#main-menu")
     dropMenu.toggleMenu();
   }
-
-  // newNote(){
-  //   function uuidv4() {
-  //     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-  //       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-  //     );
-  //   }
-
-  //   var noteId;
-  //   while(localStorage.getItem(noteId = uuidv4()));
-  // }
 
   onUpdate(){
     this.dispatchEvent(new Event("update"));
@@ -111,6 +94,7 @@ class ChatBox extends LitElement {
     return html`
 
     <div class="app">
+      <!-- appbar -->
       <app-topbar>
         <appbar-items slot="left">
           <icon-button style="margin-right:8px;" @click="${this.onToggle}" name="menu" id="more_vert"></icon-button>
@@ -120,17 +104,18 @@ class ChatBox extends LitElement {
           <icon-button name="remove_red_eye" id="more_vert" @click="${this.onToggleNicksList}"></icon-button>
           <icon-button name="more_vert" id="more_vert" @click="${this.openDropMenu}"></icon-button>
           <drop-menu id="main-menu" >
-            <dropmenu-list @item-click="${this.onMenuChoose}" list="About,Settings,Delete;split,Reset Storage"></dropmenu-list>
+            <dropmenu-list @item-click="${this.onMenuChoose}" list="Settings,About;split,Delete"></dropmenu-list>
           </drop-menu>
         </appbar-items>
       </app-topbar>
+
+      <!-- main editor -->
       <div class="chat-box">
-        <note-editor @update="${this.onUpdate}" .uuid=${this.uuid}></note-editor>
-        <!-- <chat-sender @send="${this.send}"></chat-sender> -->
+        <note-editor @update="${this.onUpdate}" .uuid=${this.uuid} .fontSize="${this.config.getConfig("font-size", 16)}" .fontFamily="${this.config.getConfig("font-family", "sans")}"></note-editor>
       </div>
     </div>
     `
   }
 }
 
-customElements.define("chat-box", ChatBox);
+customElements.define("app-box", ChatBox);

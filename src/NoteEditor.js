@@ -1,10 +1,13 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
-import { Notes } from "/src/Notes.js";
+import { LitElement, html, css, classMap } from '/lib/lit.min.js';
+import { Notes } from "/src/data/Notes.js";
 
 class NoteEditor extends LitElement {
   static properties = {
-    uuid: {type: String}
+    uuid: {type: String},
+    fontSize: {type: Number},
+    fontFamily: {type: String}
   }
+
   static styles = css`
   .chat-box{
     width: 100%;
@@ -17,7 +20,6 @@ class NoteEditor extends LitElement {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    font-family:Helvetica, Arial, sans-serif;
     font-size: 16px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -113,18 +115,26 @@ class NoteEditor extends LitElement {
     background: rgba(0,0,0,0.55);
     /* color:white; */
   }
+
+  .font-sans{
+    font-family:Helvetica, Arial, sans-serif;
+  }
+
+  .font-serif{
+    font-family: serif;
+  }
+
+  .font-mono{
+    font-family: monospace;
+  }
   `;
 
   constructor(){
     super();
 
     this.uuid = "";
-  }
-
-  updated(){
-    // const cb = this.renderRoot.querySelector(".chat-box")
-    // cb.scrollTop = cb.scrollHeight;
-    // console.log("scroll")
+    this.fontSize = 16;
+    this.fontFamily = "sans"
   }
 
   updated(){
@@ -152,18 +162,6 @@ class NoteEditor extends LitElement {
     }
   }
 
-  // updateTitle(uuid, title){
-  //   // let list = JSON.parse(localStorage.getItem("list") || "[]");
-  //   let list = new Notes().getNotes();
-  //   for(var i in list){
-  //     if(uuid == list[i].id){
-  //       list[i].title = title
-  //       break;
-  //     }
-  //   }
-  //   // localStorage.setItem("list", JSON.stringify(list));
-  // }
-
   onChange(){
     const txt = this.renderRoot.querySelector("textarea");
     if(!this.uuid){
@@ -186,7 +184,7 @@ class NoteEditor extends LitElement {
   render(){
     console.log(this.logs);
     return html`
-    <textarea @keyup="${this.onChange}" @change="${this.onChange}" class="chat-box"></textarea>
+    <textarea style="font-size: ${this.fontSize}px;" @keyup="${this.onChange}" @change="${this.onChange}" class="chat-box font-${this.fontFamily}"></textarea>
     `
   }
 }
