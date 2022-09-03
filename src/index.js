@@ -154,6 +154,8 @@ class MainApp extends LitElement {
   async updateNotesList(){
     // let { notes, notelist } = await this.getNotes();
     // this._noteUuidList = notelist;
+    const noteLists = this.renderRoot.querySelector("note-lists");
+    noteLists.update();
   }
 
   onNoteSelected(e) {
