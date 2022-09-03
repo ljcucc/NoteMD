@@ -1,7 +1,7 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
+import {LitElement, html, css, classMap} from '/lib/lit.min.js';
 
-import { classMap } from 'https://unpkg.com/lit-html/directives/class-map'; // origin: lit-html/directives/class-map 
-import { styleMap } from 'https://unpkg.com/lit-html/directives/style-map'; // origin: lit-html/directives/style-map 
+// import { classMap } from 'https://unpkg.com/lit-html/directives/class-map'; // origin: lit-html/directives/class-map 
+// import { styleMap } from 'https://unpkg.com/lit-html/directives/style-map'; // origin: lit-html/directives/style-map 
 
 class DropMenu extends LitElement{
 
@@ -22,7 +22,7 @@ class DropMenu extends LitElement{
     },
     left: {
       type: Boolean
-    }
+    },
   }
 
   static styles = css`
@@ -68,6 +68,7 @@ class DropMenu extends LitElement{
     position: relative;
     display: none;
   }
+
   `;
 
   firstUpdated(){
@@ -106,7 +107,7 @@ class DropMenu extends LitElement{
         'close':!this._state,
         'left': this.left,
       })
-      }" @click="${this.closeMenu}">
+      } " @click="${this.closeMenu}">
         <slot></slot>
       </div>
     </div>
@@ -165,5 +166,60 @@ class DropMenuList extends LitElement{
   }
 }
 
+class DropMenuArray extends LitElement{
+  static properties = {
+    list: {
+      type: Array
+    },
+  }
+
+  static styles = css`
+  *{
+      font-family: Helvetica, Arial, sans-serif;
+  }
+    .list>.item{
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 16px;
+      transition: background 0.35s;
+      cursor: pointer;
+    }
+    .list>.item.split{
+      border-bottom: 1px solid rgba(0,0,0,0.35);
+    }
+    .list>.item:hover{
+      background:rgba(0,0,0,.15);
+    }
+    .list>.item:active{
+      background:rgba(0,0,0,.35);
+    }
+  `;
+
+  itemClicked(id){
+    // const id = e.path[0].id;
+    return (() => {
+      console.log(id)
+      const event = new CustomEvent('select', {
+        detail: { id }
+      });
+      this.dispatchEvent(event);
+    }).bind(this);
+  }
+
+  render(){
+    // let listItems = this.list.split(",");
+    let getTitle = (item)=>item?.title || "";
+    let getType = (item)=>item?.type || "";
+    return html`
+      <div class="list">
+        ${this.list.map(item=>html`<div id="${getTitle(item)}" @click="${this.itemClicked(item?.id || "")}" class="item${classMap({
+          split: getType(item) || "" == "split"
+        })}">${getTitle(item)}</div>`)}
+      </div>
+    `;
+  }
+}
+
 customElements.define("drop-menu", DropMenu);
 customElements.define("dropmenu-list", DropMenuList);
+customElements.define("dropmenu-array", DropMenuArray);

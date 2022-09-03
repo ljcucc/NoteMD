@@ -2,12 +2,12 @@ import {LitElement, html, css, unsafeHTML} from '/lib/lit.min.js';
 
 import "/src/components/IconButton.js";
 
-class NicksList extends LitElement{
+class MarkdownPreview extends LitElement{
 
   static properties = {
     title: {type: String},
     content: {type: String},
-    uuid: {type: String},
+    // uuid: {type: String},
   };
 
   constructor(){
@@ -15,7 +15,7 @@ class NicksList extends LitElement{
 
     this.title = "Channel Title";
     this.content = "Channel Title";
-    this.uuid = "Channel Topic";
+    // this.uuid = "Channel Topic";
   }
 
   static styles = css`
@@ -277,4 +277,4 @@ th{
   }
 }
 
-customElements.define("nicks-list", NicksList);
+customElements.define("markdown-preview", MarkdownPreview);

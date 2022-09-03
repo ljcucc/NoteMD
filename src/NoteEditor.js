@@ -1,11 +1,16 @@
-import { LitElement, html, css, classMap } from '/lib/lit.min.js';
+import { LitElement, html, css, classMap, until} from '/lib/lit.min.js';
 import { Notes } from "/src/data/Notes.js";
+
+import { getDatabaseWithStrategy } from "/src/data/Database.js";
+import { Config } from './data/Config.js';
+
+let config = new Config();
 
 class NoteEditor extends LitElement {
   static properties = {
-    uuid: {type: String},
     fontSize: {type: Number},
-    fontFamily: {type: String}
+    fontFamily: {type: String},
+    note: { type: Object },
   }
 
   static styles = css`
@@ -132,27 +137,26 @@ class NoteEditor extends LitElement {
   constructor(){
     super();
 
-    this.uuid = "";
     this.fontSize = 16;
     this.fontFamily = "sans"
+
+    this.note = null;
   }
 
-  updated(){
+  async updated(){
     const txt = this.renderRoot.querySelector("textarea");
-    // const note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}");
-    const note = new Notes().getNote(this.uuid);
+    const note = this.note;
     if(!note) {
       txt.value = "";
       return;
     }
     console.log({
       note,
-      uuid: this.uuid
     })
-    txt.value = note.content || "";
+    txt.value = (await note.getContent()) || "";
   }
 
-  getTitle(txt){
+  getTitleFromMetadata(txt){
     let list = txt.split("\n");
     for(var i in list){
       var key = list[i].split(":");
@@ -162,29 +166,30 @@ class NoteEditor extends LitElement {
     }
   }
 
-  onChange(){
+  async onChange(){
     const txt = this.renderRoot.querySelector("textarea");
-    if(!this.uuid){
+
+    if(!this.note){
       txt.value = "";
       return;
     }
-    // let note = JSON.parse(localStorage.getItem(`note:${this.uuid}`) || "{}" );
-    let n = new Notes();
-    let note = n.getNote(this.uuid);
-    note.content = txt.value
-    note.title = this.getTitle(txt.value.split("...")[0] || "Untitled")
-    // this.updateTitle(note.id, note.title)
-    console.log(note);
-    n.updateNote(this.uuid, note);
-    // localStorage.setItem(`note:${this.uuid}`, JSON.stringify(note))
+
+    let note = this.note;
+    await note.setContent(txt.value);
+    await note.setTitle(this.getTitleFromMetadata(txt.value.split("...")[0] || "Untitled"));
 
     this.dispatchEvent(new Event("update"))
+  }
+
+  async onType(){
+    if(config.getLocalConfig("auto-backup-solution", "onchange") != "ontype") return;
+    await this.onChange()
   }
 
   render(){
     console.log(this.logs);
     return html`
-    <textarea style="font-size: ${this.fontSize}px;" @keyup="${this.onChange}" @change="${this.onChange}" class="chat-box font-${this.fontFamily}"></textarea>
+    <textarea style="font-size: ${this.fontSize}px;" @keyup="${this.onType}" @change="${this.onChange}" class="chat-box font-${this.fontFamily}"></textarea>
     `
   }
 }

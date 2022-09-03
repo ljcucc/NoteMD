@@ -1,14 +1,21 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
+import {LitElement, html, css, until} from '/lib/lit.min.js';
 
 import "/src/components/IconButton.js";
 import "/src/components/Button.js";
 import { Config } from '/src/data/Config.js';
+
+import { getDatabaseWithStrategy, getStorageStrategyType } from "/src/data/Database.js";
+
+// import "/src/widgets/BackendStrategyHint.js";
+import "/src/widgets/HintBlock.js";
+import "/src/components/Select.js";
 
 class SettingsPage extends LitElement{
 
   static properties = {
     open: {type: String},
     options: {type: Object},
+    _storageStrategy: {type: String},
   }
 
   static styles = css`
@@ -108,7 +115,7 @@ class SettingsPage extends LitElement{
     line-height: 30px;
   }
 
-  input, select{
+  input, select, textarea{
     background: rgba(0,0,0,0.05);
     border-radius: 10px;
     font-size: 18px;
@@ -245,20 +252,26 @@ class SettingsPage extends LitElement{
   constructor(){
     super();
 
-    this.config = new Config();
+    this.config = new Config(getDatabaseWithStrategy());
+    this._storageStrategy = getStorageStrategyType();
   }
 
   close(){
     this.dispatchEvent( new Event("close"));
   }
 
-  onChange(key, value){
-    return (e)=>{
+  onChange(key){
+    return async (e)=>{
       const el = this.renderRoot.querySelector(`*[name=${key}]`);
       const value = el.value;
       console.log(key, el.value);
 
-      this.config.setConfig(key, value);
+      if (key == "storage-solution") {
+        this._storageStrategy = value;
+        this.requestUpdate();
+      }
+
+      await this.config.setConfig(key, value);
 
      this.dispatchEvent(new Event("change")) 
     };
@@ -274,6 +287,51 @@ class SettingsPage extends LitElement{
   }
 
   render(){
+    const serverConfig = html`
+
+      <!-- <backend-strategy-hint></backend-strategy-hint> -->
+      <hint-block>
+      ⚠️ This strategy still in beta! and reqiured a MDNote-server hosted on public or a reachable IP that you can connect.
+      learn more about md-server here: <a href="https://github.com/ljcucc/NoteMD-server" target="_blank" rel="noopener noreferrer">[ notemd-server on github ]</a>
+      </hint-block>
+
+      <div class="label">Backend Server Address</div>
+      <input name="backend-server-address" type="text" .value=${until(this.config.getConfig("backend-server-address", "http://localhost"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
+
+      <div class="label">Port</div>
+      <input name="backend-server-port" type="number" .value=${until(this.config.getConfig("backend-server-port", 8080))} placeholder="8080" @change="${this.onChange("backend-server-port")}"/>
+
+      <!-- <div class="label">Account</div>
+      <input type="text" .value=${until(this.config.getConfig("backend-server-account", ""))} placeholder="exmpale@ljcu.cc" @change="${this.onChange("backend-server-account")}"/> -->
+
+      <div class="label">Session key</div>
+      <input style="width: auto;max-width: 500px" name="backend-server-passwd" type="password" .value=${until(this.config.getConfig("backend-server-passwd", ""))} placeholder="P@5svv0R6" @change="${this.onChange("backend-server-passwd")}"/>
+      <app-button style="margin-top: 24px;align-self: flex-start" @click="${this.resetStorage}">Connect</app-button>
+
+      <hint-block>
+        All configurations will store locally. if not working try to reload the page.
+      </hint-block>
+    `;
+
+    const restfulApiConfig = html`
+      <hint-block>RESTful API feature is unfinished, all option will be disabled</hint-block>
+      <div class="label">GetItem request</div>
+      <textarea disabled name="backend-server-address" type="text" .value=${until(this.config.getConfig("restful-get-request", "{}"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}">
+      </textarea>
+
+      <div class="label">SetItem request</div>
+      <textarea disabled name="backend-server-address" type="text" .value=${until(this.config.getConfig("restful-set-request", "{}"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
+      </textarea>
+
+      <div class="label">RemoveItem request</div>
+      <textarea disabled name="backend-server-address" type="text" .value=${until(this.config.getConfig("restful-set-request", "{}"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
+      </textarea>
+
+      <div class="label">IsExists request</div>
+      <textarea disabled name="backend-server-address" type="text" .value=${until(this.config.getConfig("restful-set-request", "{}"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
+      </textarea>
+    `;
+
     return html`
     <div class="settings-page ${this.open == "true" ? "open" : ""} ${this.open == "false" ? "close": ""}">
       <div class="dialog">
@@ -283,37 +341,67 @@ class SettingsPage extends LitElement{
       </div>
 
       <div class="options" @submit="${this.onChange("appearance")}">
+         <div class="subtitle" style="margin-top: 0;">General Settings</div>
          <div class="label">Font size</div>
-          <input .value=${this.config.getConfig("font-size", 16)} name="font-size" type="number" placeholder="16" min="0" @change="${this.onChange("font-size")}"/>
+          <input .value=${until(this.config.getConfig("font-size", 16))} name="font-size" type="number" placeholder="16" min="0" @change="${this.onChange("font-size")}"/>
 
           <div class="label">Font family</div>
-          <select .value=${this.config.getConfig("font-family","sans")} name="font-family" @change="${this.onChange("font-family")}">
+          <app-select 
+          style="width: 300px;" 
+          .list=${[
+            { title: "Sans (Helvetica)", id: "sans" },
+            { title: "Monospace", id: "mono" },
+            { title: "Serif", id: "serif" },
+          ]}
+          .value=${until(this.config.getConfig("font-family","sans"))}
+          name="font-family"
+          @select="${this.onChange("font-family")}"
+          ></app-select>
+          <!-- <select .value=${until(this.config.getConfig("font-family","sans"))} name="font-family" @change="${this.onChange("font-family")}">
             <option value="sans">Sans (Helvetica)</option>
             <option value="mono">Monospace</option>
             <option value="serif">Serif</option>
-          </select>
-
-          <!-- <div class="subtitle">Storage / Server</div>
-
-          <div class="label">Storage Strategy</div>
-          <select name="font-family" @change="${this.onChange("font-family")}">
-            <option value="local">locally (localStorage)</option>
-            <option value="md-server" disabled>NoteMD Server</option>
           </select> -->
 
-          <!-- <div class="label">Backend Server Address</div>
-          <input type="text" placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
+          <div class="subtitle">Storage / Server</div>
 
-          <div class="label">Port</div>
-          <input type="number" placeholder="8080" @change="${this.onChange("backend-server-port")}"/>
+          <div class="label">Storage Strategy</div>
+          <app-select 
+            style="width: auto;max-width: 400px;" 
+            .value=${until(this.config.getConfig("storage-solution", "local"))} 
+            name="storage-solution" 
+            @select="${this.onChange("storage-solution")}"
+            .list=${[
+              {id: "local", title: "local-only (localStorage)"},
+              {id: "md-server", title: "NoteMD Server"},
+              {id: "restful-api", title: "RESTful API"},
+            ]}
+          >
+          </app-select>
 
-          <div class="label">Email Account</div>
-          <input type="email" placeholder="exmpale@ljcu.cc" @change="${this.onChange("backend-server-account")}"/>
+          ${(this._storageStrategy == "md-server"?serverConfig:"")}
+          ${(this._storageStrategy == "restful-api"?restfulApiConfig:"")}
 
-          <div class="label">Password / Session key</div>
-          <input type="password" placeholder="P@5svv0R6" @change="${this.onChange("backend-server-passwd")}"/> -->
+          <div class="subtitle">Advanced Settings</div>
+
+          <div class="label">Backup Strategy</div>
+          <app-select style="width: auto;max-width: 400px;" 
+            .value=${until(this.config.getConfig("auto-backup-solution", "onchange"))} 
+            name="auto-backup-solution" 
+            @select="${this.onChange("auto-backup-solution")}"
+            .list=${[
+              {id:"onchange", title: "on change"},
+              {id: "ontype", title: "on type (upload frequently)"},
+            ]}>
+          </app-select>
+
+          <hint-block>If you choosing ontype, Notes will send request in every time you press the key.</hint-block>
+
+          <div class="subtitle">Reset / Diagnosis</div>
         
-          <app-button style="margin-top: 50px;color:#B00020;align-self: flex-start" @click="${this.resetStorage}">Reset storages</app-button>
+          <app-button style="margin-top: 50px;color:#B00020;align-self: flex-start" @click="${this.resetStorage}">Reset localstorage</app-button>
+          <hint-block>If the file system is broken, trying to reset localstorage and try again.</hint-block>
+
       </div>
       </div>
     </div>

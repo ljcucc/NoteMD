@@ -1,6 +1,6 @@
 # NoteMD - Simple web based note
 
-> :warning: under development
+NoteMD is a simple but modern web note taking app by using markdown, built with Lit and web components.
 
 ## Get Started
 
@@ -16,14 +16,23 @@ the first horizen split must begin `---` and end with `...` .
 
 ## How it works?
 
-open index.html in browser.
+just open index.html in browser. it's that simple.
 
 > all notes are storage locally at localStorage.
 
 # Todo
 
 - [x] Delete note
-- [ ] Settings page
+- [x] Settings page
 - [ ] Markdown snippets
-- [ ] Backend server supported
-- [ ] Adjustable preview & note list
+- [x] Backend server supported
+- [x] Adjustable preview & note list
+- [ ] Restful API support
+
+# Credit
+
+Thanks to these technology helping me to build this app.
+
+* Lit ( https://lit.dev )
+* Material Icons ( https://material.io/icons )
+* Showdown ( https://github.com/showdownjs/showdown )

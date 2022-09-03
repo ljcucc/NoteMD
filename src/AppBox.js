@@ -1,4 +1,5 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
+import {LitElement, html, css, until} from '/lib/lit.min.js';
+import { getDatabaseWithStrategy, getStorageStrategyType } from "/src/data/Database.js";
 
 import "/src/components/IconButton.js";
 import "/src/components/DropMenu.js";
@@ -6,16 +7,21 @@ import "/src/components/DropMenu.js";
 import "/src/NoteEditor.js";
 import { Config } from '/src/data/Config.js';
 
+import "/src/widgets/DialogPage.js";
+
 class ChatBox extends LitElement {
   static properties = {
-    // logs: {tyep: Array},
-    uuid: {type: String},
-    title: {type: String},
+    title: { type: String },
+    note: { type: Object },
 
-    // _fontSize: {type: Number},
+    _openAbout: { type: String },
   };
 
   static styles = css`
+
+  *{
+    font-family: Helvetica, Arial, sans-serif;
+  }
 
   .app{
     display: flex;
@@ -48,11 +54,11 @@ class ChatBox extends LitElement {
   constructor(){
     super();
 
-    this.uuid = "";
     this.title = "NoteMD";
     this.config = new Config();
+    this.note = null;
 
-    // this._fontSize = this.config.getConfig("font-size", 16);
+    this._openAbout = "";
   }
   
   onToggle(){
@@ -61,7 +67,7 @@ class ChatBox extends LitElement {
   
   onToggleNicksList(){
     console.log("hi")
-    this.dispatchEvent(new Event("show-nickslist"))
+    this.dispatchEvent(new Event("show-preview"))
   }
 
   onMenuChoose(e){
@@ -75,7 +81,8 @@ class ChatBox extends LitElement {
     }
 
     if(id == "About"){
-      window.open("https://github.com/ljcucc/NoteMD/")
+      // window.open("https://github.com/ljcucc/NoteMD/")
+      this._openAbout = "true";
     }
   }
 
@@ -88,8 +95,13 @@ class ChatBox extends LitElement {
     this.dispatchEvent(new Event("update"));
   }
 
+  aboutClose(){
+    this._openAbout = "false";
+  }
+
   render(){
     console.log(this.logs);
+    console.log("getStorageStrategyType", getStorageStrategyType());
 
     return html`
 
@@ -98,9 +110,15 @@ class ChatBox extends LitElement {
       <app-topbar>
         <appbar-items slot="left">
           <icon-button style="margin-right:8px;" @click="${this.onToggle}" name="menu" id="more_vert"></icon-button>
-          <appbar-title .title=${this.uuid == ""? "": this.title}></appbar-title>
+          <appbar-title .title=${this.note == null? "": this.title}></appbar-title>
         </appbar-items>
         <appbar-items slot="right">
+          ${
+            getStorageStrategyType() == "md-server"?
+            html`
+              <icon-button name="cloud" style="opacity: 0.35;"></icon-button>
+            `: ""
+          }
           <icon-button name="remove_red_eye" id="more_vert" @click="${this.onToggleNicksList}"></icon-button>
           <icon-button name="more_vert" id="more_vert" @click="${this.openDropMenu}"></icon-button>
           <drop-menu id="main-menu" >
@@ -111,9 +129,34 @@ class ChatBox extends LitElement {
 
       <!-- main editor -->
       <div class="chat-box">
-        <note-editor @update="${this.onUpdate}" .uuid=${this.uuid} .fontSize="${this.config.getConfig("font-size", 16)}" .fontFamily="${this.config.getConfig("font-family", "sans")}"></note-editor>
+        <note-editor .note=${this.note} @update="${this.onUpdate}" .fontSize="${
+          until(this.config.getConfig("font-size", 16))
+          }" .fontFamily="${
+            until(this.config.getConfig("font-family", "sans"))
+            }"></note-editor>
       </div>
     </div>
+
+    <dialog-page title="About" .open=${this._openAbout} @close="${this.aboutClose}">
+      <div style="padding: 8px">
+        <img src="/assets/icon@512.png" alt="" srcset="" width="256" />
+
+        <div style="padding: 8px;">
+          <h2>Notes</h2>
+          <p>
+            As known as NoteMD, which is a simple but modern note (web) app. 
+          </p>
+
+          <p>
+            We're learning from the concept of IRC, Supported wide range of backend server solution by using cross-origin RESTful API, separate the front-end and back-end to different provider.
+          </p>
+
+          <p>Version: 1.1</p>
+
+        </div>
+      </div>
+    </dialog-page>
+
     `
   }
 }

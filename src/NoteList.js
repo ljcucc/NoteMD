@@ -1,4 +1,6 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
+import { getStorageStrategyType } from './data/Database.js';
+import { Note, LocalNotes, ServerNotes } from '/src/data/Notes.js';
+import {LitElement, html, css, until} from '/lib/lit.min.js';
 import "/src/components/Icons.js";
 
 class SearchBar extends LitElement{
@@ -36,6 +38,7 @@ class SearchBar extends LitElement{
       padding: 24px;
       margin-bottom: 0px;
     }
+
   `;
 
   submit(){
@@ -56,10 +59,113 @@ class SearchBar extends LitElement{
   }
 }
 
-class NoteList extends LitElement {
+class NoteLists extends LitElement {
   static properties = {
-    list: {type: Object},
     _filteredString: {type: String},
+  };
+
+  static styles = css`
+  .note-list{
+    height: 100vh;
+    border-right: 1px solid rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+
+    /* padding-bottom: 100px; */
+
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 18px;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  
+
+  search-bar{
+    width: 100%;
+    min-width: 100px;
+  }
+
+  ::-webkit-scrollbar {
+  width: 10px;
+}
+
+  ::-webkit-scrollbar-thumb{
+    transition: all 0.35s;
+    border-radius: 10px;
+    background-color: rgba(0,0,0,.15);
+  }
+
+  ::-webkit-scrollbar-thumb:hover{
+    background-color: rgba(0,0,0,.35);
+  }
+
+  ::-webkit-scrollbar-track{
+    background: transparent;
+  }
+
+  `;
+
+  selectedNote(e){
+    const detail = e.detail;
+    this.dispatchEvent(new CustomEvent("select", {
+      detail
+    }));
+  }
+
+  newNote(){
+    this.dispatchEvent(new Event("new"));
+  }
+
+  onSearch(e){
+    const { value } = e.detail;
+    this._filteredString = value;
+  }
+
+  constructor(){
+    super();
+    this._filteredString = "";
+  }
+
+  render(){
+    console.log(this.list);
+
+    return html`
+    <div class="note-list" >
+      <search-bar @search="${this.onSearch}"></search-bar>
+
+      <note-list 
+        @select="${this.selectedNote}" 
+        @new="${this.newNote}" 
+        .storageStrategy=${new LocalNotes()} 
+        strategyName="Local"
+      ></note-list>
+
+      ${getStorageStrategyType() == "md-server" ?
+      html`
+        <note-list 
+          @select="${this.selectedNote}" 
+          @new="${this.newNote}" 
+          .storageStrategy=${new ServerNotes()} 
+          strategyName="Server"
+        ></note-list>
+      `: ""
+      }
+
+      <!-- <div class="label">Server</div> -->
+
+      <div style="margin-bottom: 100px; width: 300px;"></div>
+    </div>
+    `;
+  }
+}
+
+class NoteList extends LitElement{
+  static properties = {
+    storageStrategy: { type: Object },
+    strategyName: { type: String },
+    _close: { type: Boolean },
+    // _noteList: { type: Array },
   };
 
   static styles = css`
@@ -104,55 +210,112 @@ class NoteList extends LitElement {
     min-width: 100px;
   }
 
+
+  .label{
+    margin-top: 32px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: Helvetica,Arial, sans-serif;
+    color: #7a7a7a;
+    padding: 16px 32px;
+
+    background:linear-gradient(white 50%, rgba(255,255,255, 0) 100%);
+    position: sticky;
+    top:0;
+  }
+
+  .list{
+    transition: max-height 0.35s;
+    box-sizing: border-box;
+    overflow: hidden;
+    height: auto;
+    max-height: 100%;
+  }
+
+  .list.close{
+    max-height: 0;
+  }
+
+  .icon{
+    transition: transform 0.15s;
+    transform-origin: center center;
+    transform: rotate(180deg);
+  }
+  .icon.close{
+    transform: rotate(90deg);
+  }
+
   `;
-
-  selectBuffer(uuid){
-    return function(){
-      // console.log(this.list[index])
-      this.dispatchEvent(new CustomEvent("select", {
-        detail:{
-          id: uuid
-        }
-      }));
-    }.bind(this)
-  }
-
-  newNote(){
-    // function uuidv4() {
-    //   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-    //     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    //   );
-    // }
-    this.dispatchEvent(new Event("new"));
-  }
-
-  onSearch(e){
-    const { value } = e.detail;
-    this._filteredString = value;
-  }
 
   constructor(){
     super();
 
-    this.list = {};
-    this._filteredString = "";
+    this.storageStrategy = null;
+    this.strategyName = null;
+
+  }
+
+  async #updateNoteList(){
+    this.requestUpdate();
+  }
+
+  async newNote(){
+    // this.dispatchEvent(new Event("new"));
+    let note = new Note(this.storageStrategy);
+    await note.create();
+    this.dispatchEvent(new CustomEvent("select", {
+      detail: {
+        note
+      }
+    }));
+    await this.#updateNoteList();
+
+    this.requestUpdate();
+  }
+
+  // update(){
+  //   this.requestUpdate();
+  // }
+
+  selectedNote(note){
+    return async function(){
+      this.dispatchEvent(new CustomEvent("select", {
+        detail:{
+          note
+        }
+      }));
+    }.bind(this);
+  }
+
+  toggleClose(){
+    this._close = !this._close;
   }
 
   render(){
-    console.log(this.list);
+    let notes = until((async () => {
+      let noteList = await this.storageStrategy.getNotesList();
+      let notes = (noteList || []).map(note =>
+        html`<div class="item" @click="${this.selectedNote(note)}">${note.getTitleSync() || "Untitled"}</div>`
+      );
+      console.log(notes)
+      return notes
+    })());
+
     return html`
-    <div class="note-list" >
-      <search-bar @search="${this.onSearch}"></search-bar>
-      ${
-        Object.keys(this.list).filter(e=>(this.list[e]?.title || "").indexOf(this._filteredString)>-1 || (this.list[e]?.content || "").indexOf(this._filteredString)>-1).map((uuid)=>
-          html`<div class="item" @click="${this.selectBuffer(uuid)}">${this.list[uuid].title || "Untitled"}</div>`
-      )}
+      <div @click="${this.toggleClose}" class="label" style="cursor: pointer; display: flex; flex-direction: row;">
+        ${this.strategyName}
+        <span style="flex: 1;"></span>
+        <material-icons name="expand_less" class="icon ${this._close ? "close": ""}"></material-icons>
+      </div>
+      <div class="list ${this._close ? "close": ""}">
+        ${notes}
+      </div>
       <div class="item create" @click="${this.newNote}"> <material-icons style="margin-top: 5px;margin-right: 16px;" name="add_circle_outline"></material-icons> New note</div>
-      <div style="margin-bottom: 100px; width: 300px;"></div>
-    </div>
     `;
   }
 }
 
+customElements.define("note-lists", NoteLists);
 customElements.define("note-list", NoteList);
+
 customElements.define("search-bar", SearchBar);

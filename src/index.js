@@ -9,7 +9,10 @@ import "/src/NoteList.js";
 import "/src/NicksList.js";
 import "/src/components/Appbar.js";
 import "/src/SettingsDialog.js";
-import { Config } from "/src/data/Config.js";
+// import { Config } from "/src/data/Config.js";
+import { MDServerDatabase } from '/src/data/Database.js';
+import { getDatabaseWithStrategy } from "/src/data/Database.js";
+import { Note } from './data/Notes.js';
 
 class MainApp extends LitElement {
   static styles = css`
@@ -36,7 +39,7 @@ class MainApp extends LitElement {
     min-width: 50vw;
   }
 
-  note-list{
+  .note-list{
     width:30vmax;
     /* max-width: 300px !important; */
     max-width: 300px;
@@ -44,7 +47,7 @@ class MainApp extends LitElement {
     transition: margin-left 0.35s;
   }
 
-    nicks-list{
+    .nicks-list{
       --wd: 50vw;
       width: var(--wd);
       min-width: var(--wd);
@@ -54,7 +57,7 @@ class MainApp extends LitElement {
       background-color: white;
     }
 
-    nicks-list.close{
+    .nicks-list.close{
       /* position: absolute;
       right:0;
       top:0;
@@ -63,7 +66,7 @@ class MainApp extends LitElement {
     }
 
 
-    note-list.close{
+    .note-list.close{
       margin-left: -300px;
     }
 
@@ -82,7 +85,7 @@ class MainApp extends LitElement {
       min-width: 100vw;
     }
 
-    nicks-list{
+    .nicks-list{
       width: 100vw;
       position: fixed;
       top:0;
@@ -93,7 +96,7 @@ class MainApp extends LitElement {
       z-index: 3000;
     }
 
-    nicks-list.close{
+    .nicks-list.close{
       /* margin-right: 0; */
       /* display: none; */
       right: -100vw;
@@ -101,13 +104,13 @@ class MainApp extends LitElement {
   }
 
   @media only screen and (max-width: 1000px){
-    note-list.close{
+    .note-list.close{
       /* margin-left: -31vmax;  */
       /* margin-left: calc( -30vmax - 30px ); */
       margin-left: -350px;
     }
 
-    note-list{
+    .note-list{
       min-width: 350px;
     }
 
@@ -122,10 +125,11 @@ class MainApp extends LitElement {
     _noteUuidList: {type: Object},
     _title: {type: String},
     _selectedNoteId: {type: String},
+    _selectedNote: {type: Note},
 
     // GUI logci
     _showlist: {type: Boolean},
-    _showNickList: {type: Boolean},
+    _showPreview: {type: Boolean},
     _openSettings: {type: String},
 
     _previewContent: {type: Object},
@@ -138,6 +142,7 @@ class MainApp extends LitElement {
 
     this._title = "NoteMD";
     this._selectedNoteId = "";
+    this._selectedNote = null;
 
     this._showlist = true;
     this._showNickList = false;
@@ -146,44 +151,15 @@ class MainApp extends LitElement {
     this.updateNotesList();
   }
 
-  updateNotesList(){
-    let { notes, notelist } = this.getNotes();
-    this._noteUuidList = notelist;
-  }
-
-  getNotes(){
-    let data = new Notes();
-    const notes = data.getNotes();
-
-    let notelist = (notes || []).reduce((acc,cur)=>{
-      const { id } = cur;
-      acc[id] = cur;
-      return acc;
-    }, {});
-
-    return {
-      notelist,
-      notes
-    }
+  async updateNotesList(){
+    // let { notes, notelist } = await this.getNotes();
+    // this._noteUuidList = notelist;
   }
 
   onNoteSelected(e) {
     this._selectedNoteId = e.detail.id;
-    this.updatePreview();
-    this.toggleList();
-  }
 
-  newNote(e){
-    let note = {
-      title: "Untitled",
-      content: ""
-    };
-
-    const id = new Notes().appendNote(note);
-    console.log(id)
-    this._selectedNoteId = id;
-
-    this.getNotes();
+    this._selectedNote = e.detail.note;
 
     this.updatePreview();
     this.toggleList();
@@ -197,8 +173,8 @@ class MainApp extends LitElement {
     this._showlist = !this._showlist;
   }
 
-  toggleNicksList(){
-    this._showNickList = !this._showNickList;
+  togglePreview(){
+    this._showPreview = !this._showPreview;
   }
 
   settingsClose(){
@@ -210,23 +186,32 @@ class MainApp extends LitElement {
   }
 
   
-  updatePreview(){
+  async updatePreview(){
     this.updateNotesList();
 
-    const id = this._selectedNoteId;
-    let note = new Notes().getNote(id);
-    let content = note.content || "";
-    let title = note.title || "";
+    // const id = this._selectedNoteId;
+    // let note = await new Notes(getDatabaseWithStrategy()).getNote(id);
+    // let content = note.content || "";
+    // let title = note.title || "";
+
+    let note = this._selectedNote;
+    let content = await note.getContent();
+    let title = await note.getTitle();
 
     this._previewContent = {
       content,
-      title
+      title,
+      note
     };
   }
 
-  onDelete(){
-    const id = this._selectedNoteId;
-    new Notes().deleteNote(id)
+  async onDelete(){
+    // const id = this._selectedNoteId;
+    // await new Notes().deleteNote(id)
+
+    const note = this._selectedNote;
+    // await new Notes().deleteNote(id)
+    await note.delete();
 
     this._selectedNoteId = "";
     this._showlist = false;
@@ -238,31 +223,29 @@ class MainApp extends LitElement {
 
   render() {
     console.log("render");
-    console.log(this._noteUuidList);
 
     return html`
     <div class="app">
       <div class="layout">
 
-        <note-list .list=${this._noteUuidList} @new="${this.newNote}" @select="${this.onNoteSelected}" class="${classMap({close:this._showlist })}"></note-list>
+        <note-lists @new="${this.newNote}" @select="${this.onNoteSelected}" class="${classMap({close:this._showlist })} note-list"></note-lists>
 
         <app-box 
           class="chat-box"
-          @show-nickslist="${this.toggleNicksList}" 
+          @show-preview="${this.togglePreview}" 
           @update="${this.updatePreview}"
           @showlist="${this.toggleList}" 
           @settings="${this.settingsOpen}"
           @delete="${this.onDelete}"
-          .uuid=${this._selectedNoteId}
+          .note=${this._selectedNote}
           .title=${this._previewContent?.title}></app-box>
 
-        <nicks-list class="${classMap({
-          close:  !this._showNickList
-        })}" @close="${this.toggleNicksList}"
-        .uuid=${this._selectedNoteId}
+        <markdown-preview class="nicks-list ${classMap({
+          close:  !this._showPreview
+        })}" @close="${this.togglePreview}"
         .title=${this._previewContent?.title || ""}
         .content=${this._previewContent?.content || ""}
-        ></nicks-list>
+        ></markdown-preview>
 
         <settings-page .open=${this._openSettings} @close="${this.settingsClose}"></settings-page>
 
@@ -273,3 +256,15 @@ class MainApp extends LitElement {
 }
 
 customElements.define("main-app", MainApp);
+
+async function test() {
+  let db = new MDServerDatabase(
+    {
+      url: "http://localhost",
+      port: 8081,
+      key: ""
+    });
+  db.test();
+}
+
+await test();
