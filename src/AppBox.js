@@ -153,6 +153,9 @@ class ChatBox extends LitElement {
 
           <p>Version: 1.1</p>
 
+          <p>Source code and more info: <a href="https://github.com/ljcucc/NoteMD" target="_blank">https://github.com/ljcucc/NoteMD</a></p>
+          <p>Self-host your backend server: <a href="https://github.com/ljcucc/NoteMD-server" target="_blank">https://github.com/ljcucc/NoteMD-server</a></p>
+
         </div>
       </div>
     </dialog-page>
