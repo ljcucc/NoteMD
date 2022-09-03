@@ -148,12 +148,13 @@ class MainApp extends LitElement {
     this._showNickList = false;
     this._openSettings = "";
 
-    this.updateNotesList();
+    // this.updateNotesList();
   }
 
-  async updateNotesList(){
+  updateNotesList(){
     // let { notes, notelist } = await this.getNotes();
     // this._noteUuidList = notelist;
+    if(!this.renderRoot) return;
     const noteLists = this.renderRoot.querySelector("note-lists");
     noteLists.update();
   }
@@ -223,6 +224,13 @@ class MainApp extends LitElement {
 
   }
 
+  updateSettings(){
+    const appbox = this.renderRoot.querySelector("app-box");
+    if(appbox) appbox.updateSettings();
+
+    this.requestUpdate();
+  }
+
   render() {
     console.log("render");
 
@@ -249,7 +257,7 @@ class MainApp extends LitElement {
         .content=${this._previewContent?.content || ""}
         ></markdown-preview>
 
-        <settings-page .open=${this._openSettings} @close="${this.settingsClose}"></settings-page>
+        <settings-page .open=${this._openSettings} @close="${this.settingsClose}" @change="${this.updateSettings()}"></settings-page>
 
       </div>
     </div>

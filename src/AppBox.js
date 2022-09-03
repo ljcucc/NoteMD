@@ -99,6 +99,10 @@ class ChatBox extends LitElement {
     this._openAbout = "false";
   }
 
+  updateSettings(){
+    this.requestUpdate();
+  }
+
   render(){
     console.log(this.logs);
     console.log("getStorageStrategyType", getStorageStrategyType());

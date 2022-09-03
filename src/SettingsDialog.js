@@ -397,6 +397,17 @@ class SettingsPage extends LitElement{
 
           <hint-block>If you choosing ontype, Notes will send request in every time you press the key.</hint-block>
 
+          <div class="label">Drawer behavior</div>
+          <app-select style="width: auto;max-width: 400px;" 
+            .value=${until(this.config.getConfig("drawer-behavior", "auto"))} 
+            name="drawer-behavior" 
+            @select="${this.onChange("drawer-behavior")}"
+            .list=${[
+              {id:"auto", title: "Close on selected (default)"},
+              {id: "ontype", title: "Resident drawer (recommended on larger screen)"},
+            ]}>
+          </app-select>
+
           <div class="subtitle">Reset / Diagnosis</div>
         
           <app-button style="margin-top: 50px;color:#B00020;align-self: flex-start" @click="${this.resetStorage}">Reset localstorage</app-button>
