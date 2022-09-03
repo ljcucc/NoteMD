@@ -13,6 +13,7 @@ import "/src/SettingsDialog.js";
 import { MDServerDatabase } from '/src/data/Database.js';
 import { getDatabaseWithStrategy } from "/src/data/Database.js";
 import { Note } from './data/Notes.js';
+import { Config } from './data/Config.js';
 
 class MainApp extends LitElement {
   static styles = css`
@@ -165,6 +166,7 @@ class MainApp extends LitElement {
     this._selectedNote = e.detail.note;
 
     this.updatePreview();
+    if(new Config().getLocalConfig("drawer-behavior", "auto") != "auto") return;
     this.toggleList();
   }
 

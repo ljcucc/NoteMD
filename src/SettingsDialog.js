@@ -404,7 +404,7 @@ class SettingsPage extends LitElement{
             @select="${this.onChange("drawer-behavior")}"
             .list=${[
               {id:"auto", title: "Close on selected (default)"},
-              {id: "ontype", title: "Resident drawer (recommended on larger screen)"},
+              {id: "resident", title: "Resident drawer (recommended on larger screen)"},
             ]}>
           </app-select>
 
