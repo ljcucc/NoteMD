@@ -81,7 +81,7 @@ export class MDServerDatabase extends LocalDatabase{
   async _request(path, body){
     body = body || {};
     body.jwt = this.jwt;
-    let data = await (await fetch(`${this.url}:${this.port}${path}`, {
+    let data = await (await fetch(`${this.url}${path}`, {
       method: "POST",
       headers:{
         'Access-Control-Allow-Origin':'*',

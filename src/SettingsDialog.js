@@ -305,8 +305,8 @@ class SettingsPage extends LitElement{
       <div class="label">Backend Server Address</div>
       <input name="backend-server-address" type="text" .value=${until(this.config.getConfig("backend-server-address", "http://localhost"))} placeholder="localhost" @change="${this.onChange("backend-server-address")}"/>
 
-      <div class="label">Port</div>
-      <input name="backend-server-port" type="number" .value=${until(this.config.getConfig("backend-server-port", 8080))} placeholder="8080" @change="${this.onChange("backend-server-port")}"/>
+      <!-- <div class="label">Port</div>
+      <input name="backend-server-port" type="number" .value=${until(this.config.getConfig("backend-server-port", 8080))} placeholder="8080" @change="${this.onChange("backend-server-port")}"/> -->
 
       <!-- <div class="label">Account</div>
       <input type="text" .value=${until(this.config.getConfig("backend-server-account", ""))} placeholder="exmpale@ljcu.cc" @change="${this.onChange("backend-server-account")}"/> -->
