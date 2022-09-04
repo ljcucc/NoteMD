@@ -184,6 +184,7 @@ class MainApp extends LitElement {
 
   settingsClose(){
     this._openSettings = "false";
+    this.updateNotesList();
   }
 
   settingsOpen(){
