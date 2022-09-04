@@ -38,6 +38,7 @@ class SelectorDropMenu extends LitElement{
     border-radius: 10px;
     box-shadow: rgba(0,0,0,.15) 0px 0px 20px;
     overflow: hidden;
+    z-index: 10;
   }
 
   .left{

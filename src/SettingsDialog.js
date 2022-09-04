@@ -384,7 +384,7 @@ class SettingsPage extends LitElement{
 
           <!-- <div class="subtitle">Advanced Settings</div> -->
 
-          <content-slider title="Advanced Settings">
+          <content-slider title="Advanced Settings" isHeader=true>
 <div class="label">Backup Strategy</div>
           <app-select style="width: auto;max-width: 400px;" 
             .value=${until(this.config.getConfig("auto-backup-solution", "onchange"))} 

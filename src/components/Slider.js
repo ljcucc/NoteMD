@@ -1,9 +1,10 @@
-import {LitElement, html, css} from '/lib/lit.min.js';
+import {LitElement, html, css, classMap} from '/lib/lit.min.js';
 
 class ContentSlider extends LitElement{
   static properties = {
     _close: { type: Boolean },
     title: { type: String },
+    isHeader: { type: Boolean },
     // _noteList: { type: Array },
   };
 
@@ -19,13 +20,15 @@ class ContentSlider extends LitElement{
     background: rgba(0,0,0,.05);
     border-radius: 10px;
 
+    transition: background 0.35s;
+
     background:linear-gradient(white 50%, rgba(255,255,255, 0) 100%);
     position: sticky;
     top:0;
   }
 
-  .label:hover{
-    background: rgba(0,0,0,.15);
+  .close.label:hover{
+    background: rgba(0,0,0,.05) !important;
   }
 
   .list{
@@ -59,6 +62,7 @@ class ContentSlider extends LitElement{
     super();
 
     this._close = true;
+    this.isHeader = false;
   }
 
   toggleClose(){
@@ -67,7 +71,9 @@ class ContentSlider extends LitElement{
 
   render(){
     return html`
-      <div @click="${this.toggleClose}" class="label" style="cursor: pointer; display: flex; flex-direction: row;">
+      <div @click="${this.toggleClose}" class="label ${classMap({
+        "close": this._close
+      })}" style="cursor: pointer; display: flex; flex-direction: row;">
         ${this.title}
         <span style="flex: 1;"></span>
         <material-icons name="expand_less" class="icon ${this._close ? "close": ""}"></material-icons>
