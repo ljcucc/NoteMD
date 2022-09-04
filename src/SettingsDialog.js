@@ -64,6 +64,7 @@ class SettingsPage extends LitElement{
   .dialog{
     width: 600px;
     padding: 16px;
+    padding-top: 0px;
     background: white;
     border-radius: 10px;
     max-height: 80vmin;
@@ -74,6 +75,12 @@ class SettingsPage extends LitElement{
     display:flex;
     flex-direction: row;
     align-items: center;
+
+    position: sticky;
+    top:-16px;
+    padding-top: 16px;
+
+    background:linear-gradient(white 50%, rgba(255,255,255, 0) 100%);
   }
 
   h2.title{

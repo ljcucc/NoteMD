@@ -15,14 +15,15 @@ class ContentSlider extends LitElement{
     font-weight: bold;
     font-family: Helvetica,Arial, sans-serif;
     /* color: #7a7a7a; */
-    padding: 16px;
+    padding: 20px;
     align-items: center;
     background: rgba(0,0,0,.05);
     border-radius: 10px;
 
     transition: background 0.35s;
 
-    background:linear-gradient(white 50%, rgba(255,255,255, 0) 100%);
+    background:linear-gradient(rgba(255,255,255, 0) 0%, white 20%, white 80%, rgba(255,255,255, 0) 100%);
+    /* background: white; */
     position: sticky;
     top:0;
   }
