@@ -3,6 +3,7 @@ import { getDatabaseWithStrategy, getStorageStrategyType } from "/src/data/Datab
 
 import "/src/components/IconButton.js";
 import "/src/components/DropMenu.js";
+import "/src/components/Slider.js";
 
 import "/src/NoteEditor.js";
 import { Config } from '/src/data/Config.js';
@@ -21,6 +22,10 @@ class ChatBox extends LitElement {
 
   *{
     font-family: Helvetica, Arial, sans-serif;
+  }
+
+  a{
+    color: #3080db;
   }
 
   .app{
@@ -155,10 +160,21 @@ class ChatBox extends LitElement {
             We're learning from the concept of IRC, Supported wide range of backend server solution by using cross-origin RESTful API, separate the front-end and back-end to different provider.
           </p>
 
-          <p>Version: 1.1</p>
+          <p>Version: 1.2</p>
 
           <p>Source code and more info: <a href="https://github.com/ljcucc/NoteMD" target="_blank">https://github.com/ljcucc/NoteMD</a></p>
           <p>Self-host your backend server: <a href="https://github.com/ljcucc/NoteMD-server" target="_blank">https://github.com/ljcucc/NoteMD-server</a></p>
+          <p>License: GPL v2</p>
+
+
+          <p style="margin-top: 100px;">
+          <content-slider title="Credit & license">
+            <a href="https://lit.dev" target="_blank">lit.dev</a> ( <a href="https://github.com/lit/lit/blob/main/LICENSE" target="_blank">LICENSE</a> ), <br>
+            <a href="https://github.com/showdownjs/showdown" target="_blank">Showdown markdown conventor</a> (<a href="https://github.com/showdownjs/showdown/blob/master/LICENSE" target="_blank">LICENSE</a>), <br>
+            <a href="https://fonts.google.com" target="_blank">Material icons, Roboto mono</a> <br>
+          </content-slider>
+
+          </p>
 
         </div>
       </div>

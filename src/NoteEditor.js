@@ -14,6 +14,8 @@ class NoteEditor extends LitElement {
   }
 
   static styles = css`
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
   .chat-box{
     width: 100%;
     height: 100%;
@@ -130,7 +132,8 @@ class NoteEditor extends LitElement {
   }
 
   .font-mono{
-    font-family: monospace;
+    /* font-family: monospace; */
+    font-family: 'Roboto Mono', monospace;
   }
   `;
 

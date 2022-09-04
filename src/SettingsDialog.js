@@ -349,8 +349,8 @@ class SettingsPage extends LitElement{
           <app-select 
           style="width: 300px;" 
           .list=${[
-            { title: "Sans (Helvetica)", id: "sans" },
-            { title: "Monospace", id: "mono" },
+            { title: "Sans", id: "sans" },
+            { title: "Monospace (Roboto Mono)", id: "mono" },
             { title: "Serif", id: "serif" },
           ]}
           .value=${until(this.config.getConfig("font-family","sans"))}
@@ -382,9 +382,10 @@ class SettingsPage extends LitElement{
           ${(this._storageStrategy == "md-server"?serverConfig:"")}
           ${(this._storageStrategy == "restful-api"?restfulApiConfig:"")}
 
-          <div class="subtitle">Advanced Settings</div>
+          <!-- <div class="subtitle">Advanced Settings</div> -->
 
-          <div class="label">Backup Strategy</div>
+          <content-slider title="Advanced Settings">
+<div class="label">Backup Strategy</div>
           <app-select style="width: auto;max-width: 400px;" 
             .value=${until(this.config.getConfig("auto-backup-solution", "onchange"))} 
             name="auto-backup-solution" 
@@ -412,6 +413,9 @@ class SettingsPage extends LitElement{
         
           <app-button style="margin-top: 50px;color:#B00020;align-self: flex-start" @click="${this.resetStorage}">Reset localstorage</app-button>
           <hint-block>If the file system is broken, trying to reset localstorage and try again.</hint-block>
+          </content-slider>
+
+          
 
       </div>
       </div>
