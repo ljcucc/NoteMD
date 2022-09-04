@@ -181,15 +181,89 @@ class NoteEditor extends LitElement {
     this.dispatchEvent(new Event("update"))
   }
 
-  async onType(){
+  async onType(e){
     if(config.getLocalConfig("auto-backup-solution", "onchange") != "ontype") return;
     await this.onChange()
+  }
+
+  onKeyPress(e){
+    const txt = this.renderRoot.querySelector("textarea");
+
+    if (txt.selectionStart != txt.selectionEnd) {
+      switch (e.key) {
+        case "_":
+        case "~":
+        case "`":
+        case "*":
+        case "[":
+        case "(":
+          e.preventDefault();
+
+          var start = txt.selectionStart
+          var end = txt.selectionEnd;
+          console.log(start, end)
+
+          // txt.value = txt.value.slice(0, start) + "*" + txt.value.slice(start, end) + "*" + txt.value.slice(end);
+          const replaceTailChar = {
+            "_":"_",
+            "~": "~",
+            "`":"`",
+            "*":"*",
+            "[":"]",
+            "(":")",
+          }
+
+          document.execCommand("insertText", false, e.key + txt.value.slice(start, end) + replaceTailChar[e.key]);
+          txt.setSelectionRange(start + 1, end + 1, "forward");
+          this.onChange();
+          break;
+        default:
+          return;
+      }
+    }
+
+    if(e.keyCode == 13){
+      e.preventDefault();
+
+      var start = txt.selectionStart 
+      var end = txt.selectionEnd;
+      var indentLine = txt.value.substring(0, start).split("\n");
+
+      indentLine = indentLine.pop()
+      var count = indentLine.indexOf(indentLine.trim())
+      // txt.value = txt.value.slice(0, start) + "\n" + " ".repeat(count) + txt.value.slice(start);
+      document.execCommand("insertText", false,  "\n" + " ".repeat(count));
+
+      txt.selectionStart = start + count + 1;
+      txt.selectionEnd = start + count + 1;
+      this.onChange();
+
+      return;
+    }
+  }
+
+  onKeyDown(e) {
+    if (e.key != "Tab"){
+      // console.log(e.key);
+      return;
+    }
+    e.preventDefault();
+
+    const txt = this.renderRoot.querySelector("textarea");
+    const start = txt.selectionStart;
+    // console.log(start);
+    txt.value = txt.value.slice(0, start) + " ".repeat(4) + txt.value.slice(start);
+
+    txt.selectionStart = start + 4;
+    txt.selectionEnd = start + 4;
+
+    this.onChange();
   }
 
   render(){
     console.log(this.logs);
     return html`
-    <textarea style="font-size: ${this.fontSize}px;" @keyup="${this.onType}" @change="${this.onChange}" class="chat-box font-${this.fontFamily}"></textarea>
+    <textarea style="font-size: ${this.fontSize}px;" @keydown="${this.onKeyDown}" @keypress="${this.onKeyPress}" @keyup="${this.onType}" @change="${this.onChange}" class="chat-box font-${this.fontFamily}"></textarea>
     `
   }
 }

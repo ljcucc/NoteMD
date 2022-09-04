@@ -247,6 +247,7 @@ th{
       openLinksInNewWindow: true,
       emoji: true,
       underline: true,
+      disableForced4SpacesIndentedSublists: true
     });
     // let note = JSON.parse(note-editor.getItem(`note:${this.uuid}`) || "{}");
     // let text = note.content || "";

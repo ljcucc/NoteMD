@@ -306,7 +306,7 @@ class SettingsPage extends LitElement{
 
       <div class="label">Session key</div>
       <input style="width: auto;max-width: 500px" name="backend-server-passwd" type="password" .value=${until(this.config.getConfig("backend-server-passwd", ""))} placeholder="P@5svv0R6" @change="${this.onChange("backend-server-passwd")}"/>
-      <app-button style="margin-top: 24px;align-self: flex-start" @click="${this.resetStorage}">Connect</app-button>
+      <!-- <app-button style="margin-top: 24px;align-self: flex-start" @click="${this.resetStorage}">Connect</app-button> -->
 
       <hint-block>
         All configurations will store locally. if not working try to reload the page.
