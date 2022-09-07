@@ -66,6 +66,27 @@ export class Notes{
     );
   }
 
+  async setNoteIndex(id, key, value){
+    console.log("setting note index", key, value)
+    let list = await this.getNotes() || [];
+    list.map(e=>{
+      if(e.id != id) return e;
+      e[key] = value;
+      return e;
+    });
+    await this.#setNotes(list);
+  }
+
+  async getNoteIndex(id, key){
+    let list = await this.getNotes() || [];
+    for(var i in list){
+      if(list[i].id == id){
+        console.log("getting note index", key, list[i][key])
+        return list[i][key];
+      }
+    }
+  }
+
   async appendNote(note) {
     // if(await this.db.isExists(`note:${note?.id||""}`)) return;
     let notes = await this.getNotes();
@@ -86,7 +107,6 @@ export class Notes{
 
     return id;
   }
-
 
   async getNote(id) {
     if (!await this.db.isExists(`note:${id}`))
@@ -170,6 +190,15 @@ export class Note{
   async getTitle(){
     await this.#fetchNote();
     return this.#obj?.title || "";
+  }
+
+  async updateLastOpen(){
+    await this.#notes.setNoteIndex(this.#uuid, "last_open", new Date().getTime());
+  }
+
+  async getLastOpen(){
+    let lastOpen = await this.#notes.getNoteIndex(this.#uuid, "last_open") || 0;
+    return lastOpen;
   }
 
   getTitleSync(){

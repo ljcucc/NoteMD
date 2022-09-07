@@ -263,6 +263,7 @@ class NoteList extends LitElement{
     // this.dispatchEvent(new Event("new"));
     let note = new Note(this.storageStrategy);
     await note.create();
+    await note.updateLastOpen();
     this.dispatchEvent(new CustomEvent("select", {
       detail: {
         note
@@ -279,6 +280,7 @@ class NoteList extends LitElement{
 
   selectedNote(note){
     return async function(){
+      await note.updateLastOpen();
       this.dispatchEvent(new CustomEvent("select", {
         detail:{
           note
@@ -294,10 +296,17 @@ class NoteList extends LitElement{
   render(){
     let notes = until((async () => {
       let noteList = await this.storageStrategy.getNotesList();
-      let notes = (noteList || []).map(note =>
-        html`<div class="item" @click="${this.selectedNote(note)}">${note.getTitleSync() || "Untitled"}</div>`
-      );
-      console.log(notes)
+      let notes = (noteList || [])
+      let noteSortIndex = await Promise.all(notes.map(e=>e.getLastOpen()))
+
+      notes = notes
+        .map((e,i)=>[e,noteSortIndex[i]])
+        .sort((a,b)=>{return b[1] - a[1]})
+        .map(e=>e[0])
+        .map(note =>
+          html`<div class="item" @click="${this.selectedNote(note)}">${note.getTitleSync() || "Untitled"}</div>`
+        );
+
       return notes
     })());
 
