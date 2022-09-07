@@ -75,6 +75,8 @@ export class MDServerDatabase extends LocalDatabase{
     this.url = url || "";
     this.port = port || 8080;
     this.jwt = jwt || "";
+
+    if(!window.existsCahce) window.existsCahce = {};
   }
 
 
@@ -105,20 +107,20 @@ export class MDServerDatabase extends LocalDatabase{
   }
 
   async setItem(key, value){
-    this.#existsCahce[key] = value;
-    let data = await this._request("/api/set", {
+    window.existsCahce[key] = value;
+    this._request("/api/set", {
       key,
       value
     });
   }
 
   async getItem(key){
-    if(key in this.#existsCahce) return this.#existsCahce[key];
+    if(key in window.existsCahce) return window.existsCahce[key];
     let { value } = (await this._request("/api/get", {
       key
     }));
 
-    this.#existsCahce[key] = value;
+    window.existsCahce[key] = value;
     return value;
   }
 
@@ -126,12 +128,12 @@ export class MDServerDatabase extends LocalDatabase{
     await this._request("/api/remove", {
       key
     });
-    delete this.#existsCahce[key];
+    delete window.existsCahce[key];
   }
 
   async isExists(key){
-    if(key in this.#existsCahce)
-      return this.#existsCahce[key];
+    if(key in window.existsCahce)
+      return window.existsCahce[key];
 
     const result = (await this._request("/api/is_exists", {
       key
