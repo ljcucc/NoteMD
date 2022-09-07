@@ -110,11 +110,15 @@ class TopbarTitle extends LitElement{
     .topbar__title{
       font-size: 24px;
       grid-column: 2/8;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden !important;
+      max-width: min( 250px, 30vmin );
     }
   `;
   render(){
     return html`
-        <span class="topbar__title">${this.title}</span>
+        <div class="topbar__title">${this.title}</div>
     `
   }
 }

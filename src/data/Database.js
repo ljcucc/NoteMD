@@ -114,9 +114,12 @@ export class MDServerDatabase extends LocalDatabase{
 
   async getItem(key){
     if(key in this.#existsCahce) return this.#existsCahce[key];
-    return (await this._request("/api/get", {
+    let { value } = (await this._request("/api/get", {
       key
-    })).value;
+    }));
+
+    this.#existsCahce[key] = value;
+    return value;
   }
 
   async removeItem(key){
@@ -136,4 +139,7 @@ export class MDServerDatabase extends LocalDatabase{
     
     return result;
   }
+}
+
+export class CacheddMDServerDatabase extends LocalDatabase{
 }
